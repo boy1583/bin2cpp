@@ -42,6 +42,8 @@ namespace bin2cpp
     //IGenerator methods
     virtual void setInputFilePath(const char * path);
     virtual const char * getInputFilePath() const;
+    virtual void setFilePathInDir(const char * path);
+    virtual const char * getFilePathInDir() const;
     virtual void setHeaderFilename(const char * path);
     virtual const char * getHeaderFilename() const;
     virtual void setFunctionIdentifier(const char * function_identifier);
@@ -78,6 +80,7 @@ namespace bin2cpp
 
     //attributes
     std::string mInputFilePath;
+    std::string mFilePathInDir;
     std::string mHeaderFilename;
     std::string mFunctionIdentifier;
     size_t mChunkSize;

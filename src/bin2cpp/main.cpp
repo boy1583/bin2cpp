@@ -33,6 +33,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <sstream>
+#include <map>
 
 #include "rapidassist/cli.h"
 #include "rapidassist/logging.h"
@@ -134,10 +135,10 @@ inline std::string filter(std::string str, const std::string & valid_characters)
 
 std::string getFunctionIdentifierFromPath(const std::string & path)
 {
-  std::string id;
+  std::string id = path;
 
   //get filename of the given path
-  id = ra::filesystem::GetFilenameWithoutExtension(path.c_str());
+  // id = ra::filesystem::GetFilenameWithoutExtension(path.c_str());
 
   // filter out characters which are not alphanumeric characters or '_'.
   static const std::string validCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_";
@@ -497,6 +498,10 @@ APP_ERROR_CODES processInputFile(const ARGUMENTS & args, bin2cpp::IGenerator * g
 
   //configure the generator
   generator->setInputFilePath(args.inputFilePath.c_str());
+  if (!args.inputDirPath.empty() && args.inputDirPath.size() + 1 < args.inputFilePath.size()) {
+      std::string pathInDir = args.inputFilePath.substr(args.inputDirPath.size() + 1);
+      generator->setFilePathInDir(pathInDir.c_str());
+  }
   generator->setHeaderFilename(args.headerFilename.c_str());
   generator->setFunctionIdentifier(args.functionIdentifier.c_str());
   generator->setChunkSize(args.chunkSize);
@@ -553,27 +558,42 @@ APP_ERROR_CODES processInputDirectory(const ARGUMENTS & args, bin2cpp::IGenerato
   if (files.empty())
     return APP_ERROR_SUCCESS;
 
+    printf("dir is %s\n", args.inputDirPath.c_str());
   //for each files
+  std::map<std::string, int> dups;
   for(size_t i=0; i<files.size(); i++)
   {
     const std::string & file = files[i];
+      printf("path is %s\n", file.c_str());
 
     //build a 'headerfile' and 'identifier' argument for this file...
     ARGUMENTS argsCopy = args;
 
     //replace 'dir' input by current file input
     argsCopy.hasDir = false;
-    argsCopy.inputDirPath = "";
+    // argsCopy.inputDirPath = "";
     argsCopy.hasFile = true;
     argsCopy.inputFilePath = file;
 
     //use the file name without extension as 'headerfile'.
-    argsCopy.headerFilename = ra::filesystem::GetFilenameWithoutExtension(file.c_str());
+    std::string filenameWithoutExtension = ra::filesystem::GetFilenameWithoutExtension(file.c_str());
+    if (dups.find(filenameWithoutExtension) != dups.end()) {
+        int dex = dups[filenameWithoutExtension];
+        filenameWithoutExtension += "_";
+        filenameWithoutExtension += std::to_string(dex);
+        dups[filenameWithoutExtension] = dex++;
+    } else {
+        dups[filenameWithoutExtension] = 2; // record next
+    }
+
+    argsCopy.headerFilename = filenameWithoutExtension;
     argsCopy.headerFilename.append(".h");
+      printf("header file name is %s\n", argsCopy.headerFilename.c_str());
 
     //use the file name without extension as 'identifier'.
-    argsCopy.functionIdentifier = getFunctionIdentifierFromPath(ra::filesystem::GetFilenameWithoutExtension(file.c_str()));
+    argsCopy.functionIdentifier = getFunctionIdentifierFromPath(filenameWithoutExtension);
     argsCopy.functionIdentifier = ra::strings::CapitalizeFirstCharacter(argsCopy.functionIdentifier);
+      printf("function identifier is %s\n", argsCopy.functionIdentifier.c_str());
 
     //process this file...
     APP_ERROR_CODES error = processInputFile(argsCopy, generator);

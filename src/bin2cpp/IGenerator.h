@@ -53,6 +53,18 @@ namespace bin2cpp
     virtual const char * getInputFilePath() const = 0;
 
     ///<summary>
+    ///Defines the path of the binary input file in origin dir.
+    ///</summary>
+    ///<param name="path">The path of the input file (resource) to embeded as C++ source code.</param>
+    virtual void setFilePathInDir(const char * path) = 0;
+
+    //<summary>
+    ///Provides the path of the input file path in origin dir.
+    ///</summary>
+    ///<returns>Returns the path of the binary input file. Returns an empty string if not defined.</returns>
+    virtual const char * getFilePathInDir() const = 0;
+
+    ///<summary>
     ///Defines the filename of the generated header.
     ///</summary>
     ///<param name="path">The path of the input file (resource) to embeded as C++ source code.</param>

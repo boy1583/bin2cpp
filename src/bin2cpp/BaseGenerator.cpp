@@ -57,6 +57,17 @@ namespace bin2cpp
     return mInputFilePath.c_str();
   }
 
+    void BaseGenerator::setFilePathInDir(const char *path)
+    {
+        if (path)
+            mFilePathInDir = path;
+    }
+
+    const char * BaseGenerator::getFilePathInDir() const
+    {
+        return mFilePathInDir.c_str();
+    }
+
   void BaseGenerator::setHeaderFilename(const char * path)
   {
     if (path)
@@ -275,6 +286,7 @@ namespace bin2cpp
     fprintf(header, "  public:\n");
     fprintf(header, "    virtual size_t getSize() const = 0;\n");
     fprintf(header, "    virtual const char * getFilename() const = 0;\n");
+    fprintf(header, "    virtual const char * getFilepath() const = 0;\n");
     fprintf(header, "    virtual const char * getBuffer() const = 0;\n");
     fprintf(header, "    virtual bool save(const char * iFilename) const = 0;\n");
     fprintf(header, "  };\n");
@@ -321,6 +333,7 @@ namespace bin2cpp
     fprintf(header, "  public:\n");
     fprintf(header, "    virtual size_t getSize() const = 0;\n");
     fprintf(header, "    virtual const char * getFilename() const = 0;\n");
+    fprintf(header, "    virtual const char * getFilepath() const = 0;\n");
     fprintf(header, "    virtual const char * getBuffer() const = 0;\n");
     fprintf(header, "    virtual bool save(const char * iFilename) const = 0;\n");
     fprintf(header, "  };\n");
